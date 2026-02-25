@@ -1,0 +1,8 @@
+{
+  "expo": {
+    "name": "linkflow-frontend",
+    "slug": "linkflow-frontend",
+    "scheme": "linkflow",
+    "version": "1.0.0"
+  }
+}
