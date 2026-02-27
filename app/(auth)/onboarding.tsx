@@ -5,7 +5,7 @@ import { Button, Text, View } from "react-native";
 export default function Onboarding() {
   const completeOnboarding = async () => {
   await AsyncStorage.setItem("onboardingDone", "true");
-  router.replace("/");
+  router.replace("/(app)");
 };
 
   return (

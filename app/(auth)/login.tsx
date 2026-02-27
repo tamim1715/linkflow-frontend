@@ -13,7 +13,7 @@ export default function LoginScreen() {
     console.log("dummy token set---")
     await AsyncStorage.setItem("token", "dummy-token");
     console.log("now redirect to onboarding")
-    router.replace("/onboarding");
+    router.replace("/(auth)/onboarding");
   };
 
   return (

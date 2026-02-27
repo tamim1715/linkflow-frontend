@@ -1,14 +1,38 @@
 import * as Linking from "expo-linking";
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
-export default function StoreRedirectSheet() {
-  const openStore = () => {
+type Props = {
+  onLeaveReview: () => void;
+};
+
+export default function StoreRedirectSheet({ onLeaveReview }: Props) {
+  const openStore = async () => {
     const url =
       Platform.OS === "ios"
         ? "https://apps.apple.com/app/idYOUR_ID"
         : "https://play.google.com/store/apps/details?id=YOUR_PACKAGE";
 
-    Linking.openURL(url);
+    try {
+      // ✅ Mark review as completed
+      onLeaveReview();
+
+      // ✅ Open store
+      const supported = await Linking.canOpenURL(url);
+
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        console.log("Cannot open store URL");
+      }
+    } catch (error) {
+      console.log("Store redirect error:", error);
+    }
   };
 
   return (
@@ -22,7 +46,7 @@ export default function StoreRedirectSheet() {
       </Text>
 
       <TouchableOpacity style={styles.button} onPress={openStore}>
-        <Text style={{ color: "#fff" }}>
+        <Text style={{ color: "#fff", fontWeight: "600" }}>
           Leave a review
         </Text>
       </TouchableOpacity>

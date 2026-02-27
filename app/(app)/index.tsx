@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Button, Text, View } from "react-native";
 
 import BottomSheet from "../../src/components/BottomSheet";
 import FeedbackSheet from "../../src/sheets/FeedbackSheet";
@@ -21,20 +21,30 @@ export default function Home() {
     try {
       const onboardingDone = await AsyncStorage.getItem("onboardingDone");
       const yesClickedTime = await AsyncStorage.getItem("yesClickedTime");
+      const reviewCompleted = await AsyncStorage.getItem("reviewCompleted");
 
       console.log("onboardingDone:", onboardingDone);
       console.log("yesClickedTime:", yesClickedTime);
+      console.log("reviewCompleted:", reviewCompleted);
 
+      // If review already completed → never show again
+      if (reviewCompleted === "true") {
+        setReady(true);
+        return;
+      }
+
+      // First time after onboarding → show review prompt
       if (onboardingDone === "true" && !yesClickedTime) {
         setSheet("review");
       }
 
+      // If user clicked Yes before → check 2 days passed
       if (yesClickedTime) {
         const days =
           (Date.now() - new Date(yesClickedTime).getTime()) /
           (1000 * 60 * 60 * 24);
 
-        if (days >= 2) {
+        if (days >= 0) {
           setSheet("store");
         }
       }
@@ -50,7 +60,24 @@ export default function Home() {
       "yesClickedTime",
       new Date().toISOString()
     );
+    // setSheet(null);
+    setSheet("store"); // 👈 immediately show store
+  };
+
+  const handleReviewComplete = async () => {
+    await AsyncStorage.setItem("reviewCompleted", "true");
     setSheet(null);
+  };
+
+  // 🧪 RESET FUNCTION (FOR TESTING)
+  const handleReset = async () => {
+    await AsyncStorage.multiRemove([
+      "token",
+      "onboardingDone",
+      "yesClickedTime",
+      "reviewCompleted",
+    ]);
+    console.log("All storage cleared");
   };
 
   if (!ready) {
@@ -66,6 +93,11 @@ export default function Home() {
       <Text style={{ marginTop: 100, textAlign: "center" }}>
         Main App Screen
       </Text>
+
+      {/* 🧪 TEMP RESET BUTTON FOR TESTING */}
+      <View style={{ marginTop: 30, alignItems: "center" }}>
+        <Button title="Reset App State (Testing)" onPress={handleReset} />
+      </View>
 
       <BottomSheet
         visible={sheet !== null}
@@ -85,7 +117,11 @@ export default function Home() {
           />
         )}
 
-        {sheet === "store" && <StoreRedirectSheet />}
+        {sheet === "store" && (
+          <StoreRedirectSheet
+            onLeaveReview={handleReviewComplete}
+          />
+        )}
       </BottomSheet>
     </View>
   );
