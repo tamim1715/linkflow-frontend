@@ -1,16 +1,18 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useContext, useState } from "react";
 import { Button, StyleSheet, TextInput, View } from "react-native";
-import { AuthContext } from "../src/context/AuthContext";
+import { AuthContext } from "../../src/context/AuthContext";
 
 export default function LoginScreen() {
+  console.log("start to login-------")
   const [email, setEmail] = useState("");
   const { login } = useContext(AuthContext);
 
   const handleLogin = async () => {
-    await login("dummy-token-123");
-
-    // Navigate manually after login
+    console.log("dummy token set---")
+    await AsyncStorage.setItem("token", "dummy-token");
+    console.log("now redirect to onboarding")
     router.replace("/onboarding");
   };
 

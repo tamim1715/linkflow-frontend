@@ -1,45 +1,45 @@
-// import { Stack } from "expo-router";
-// import { AuthProvider } from "../src/context/AuthContext";
-
-// export default function RootLayout() {
-//   return (
-//     <AuthProvider>
-//       <Stack screenOptions={{ headerShown: false }} />
-//     </AuthProvider>
-//   );
-// }
-
-import * as Linking from "expo-linking";
-import { Stack, router } from "expo-router";
-import { useContext, useEffect } from "react";
-import { AuthContext, AuthProvider } from "../src/context/AuthContext";
-
-function RootNavigation() {
-  const { login } = useContext(AuthContext);
-
-  useEffect(() => {
-    const subscription = Linking.addEventListener("url", async (event) => {
-      const url = event.url;
-
-      const parsed = Linking.parse(url);
-      const token = parsed.queryParams?.token as string;
-
-      if (token) {
-        await login(token);
-        router.replace("/");
-      }
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  return <Stack screenOptions={{ headerShown: false }} />;
-}
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 export default function RootLayout() {
-  return (
-    <AuthProvider>
-      <RootNavigation />
-    </AuthProvider>
-  );
+  console.log("layout start----")
+  const [status, setStatus] = useState<
+    "loading" | "auth" | "app"
+  >("loading");
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const token = await AsyncStorage.getItem("token");
+    const onboardingDone = await AsyncStorage.getItem("onboardingDone");
+
+    console.log("token: ", token)
+    console.log("onboardingDone: ", onboardingDone)
+
+    if (!token || !onboardingDone) {
+      setStatus("auth");
+    } else {
+      setStatus("app");
+    }
+  };
+  console.log("status: ", status)
+
+  if (status === "loading") {
+    return (
+      <View style={{ flex:1, justifyContent:"center", alignItems:"center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (status === "auth") {
+    console.log("test login-----")
+    return <Redirect href="../(auth)/login" />;
+  }
+
+  return <Redirect href="/(app)" />;
 }
