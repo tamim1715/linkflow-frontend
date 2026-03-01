@@ -1,50 +1,289 @@
-# Welcome to your Expo app 👋
+# Linkflow Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Production-ready Magic Link authentication mobile application built with React Native (Expo).
 
-## Get started
+Linkflow demonstrates secure passwordless authentication, JWT-based authorization, protected API calls, and a clean frontend architecture aligned with production best practices.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Table of Contents
 
-2. Start the app
+- Overview
+- Features
+- Architecture
+- Authentication Flow
+- Application Flow
+- API Integration
+- Security Considerations
+- Project Structure
+- Local Development Strategy
+- Design Decisions
+- Limitations
+- Future Improvements
+- Tech Stack
+- Author
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Overview
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Linkflow implements a passwordless authentication flow using expiring magic links instead of passwords.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Authentication Flow:
 
-## Get a fresh project
+1. User requests login link
+2. Backend generates a time-limited token
+3. Token is delivered via deep link
+4. User verifies the token
+5. Backend issues JWT
+6. JWT is used to access protected endpoints
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
+## Features
+
+- Passwordless authentication (Magic Link)
+- JWT-based stateless authorization
+- Protected feedback submission
+- Clean Expo Router navigation
+- Separation of UI and API logic
+- Development-friendly manual verification mode
+
+---
+
+## Architecture
+
+The frontend follows a layered client architecture:
+
+```
+UI Layer (Screens)
+        ↓
+Context Layer (Auth State)
+        ↓
+Service Layer (API Calls)
+        ↓
+Backend API
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Architectural Principles
 
-## Learn more
+- Screens contain no API logic
+- Services handle HTTP communication
+- AuthContext manages authentication state
+- JWT stored client-side
+- Clear separation between public and protected flows
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Authentication Flow
 
-## Join the community
+1. User enters email
+2. App calls:
 
-Join our community of developers creating universal apps.
+   POST /api/auth/request-link
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. Backend sends deep link via email
+4. User clicks link
+5. App opens via deep linking
+6. App calls:
+
+   POST /api/auth/verify
+
+7. Backend returns JWT
+8. JWT stored locally
+9. Protected APIs use:
+
+   Authorization: Bearer <token>
+
+---
+
+## Application Flow
+
+Login → Check Email → Verify → Onboarding → Review Prompt → Feedback (if needed)
+
+Feedback submission requires authentication.
+
+---
+
+## API Integration
+
+### Request Magic Link
+
+POST /api/auth/request-link
+
+Request Body:
+
+```json
+{
+  "email": "shahadathhossain447@gmail.com"
+}
+```
+
+---
+
+### Verify Token
+
+POST /api/auth/verify?token=my-token
+
+
+Response:
+
+```json
+{
+  "token": "jwt-token"
+}
+```
+
+---
+
+### Submit Feedback (Protected)
+
+POST /api/feedback
+
+Headers:
+
+Authorization: Bearer <jwt-token>
+
+Request Body:
+
+```json
+{
+  "message": "User feedback text"
+}
+```
+
+---
+
+## Security Considerations
+
+- Stateless JWT authentication
+- No session stored on backend
+- Protected routes require Bearer token
+- Authentication endpoints publicly accessible but rate-limited on backend
+- No password storage
+
+
+---
+
+## Project Structure
+
+```
+app/
+ ├── (auth)/
+ │    ├── login.tsx
+ │    ├── onboarding.tsx
+ │
+ ├── (app)/
+ │    ├── index.tsx
+ |
+ ├── _layout.tsx
+ ├── index.tsx
+ │
+src/
+ ├── services/
+ │    ├── authService.ts
+ │    ├── feedbackService.ts
+ │
+ ├── context/
+ │    ├── AuthContext.tsx
+ |
+ ├── api/
+ │    ├── client.ts
+ |
+ ├── sheets/
+ │    ├── FeedbackSheet.tsx
+ │    ├── ReviewPromptSheet.tsx
+ │    ├── StoreRedirectSheet.tsx
+ |
+ ├── theme/
+ │    ├── colors.ts
+ |    ├── spacing.ts
+```
+
+- `app/` handles routing (Expo Router)
+- `src/services/` contains API logic
+- `src/context/` manages authentication state
+
+---
+
+## Local Development Strategy
+
+Expo Go does not automatically open deep links from backend logs.
+
+To enable local testing:
+
+1. Backend logs generated deep link:
+
+   myapp://api/auth/verify?token=my-token
+
+2. Developer manually copies token
+3. Token pasted into app verify input
+4. App calls /verify
+5. JWT received
+6. Normal flow continues
+
+This manual verification for development purposes.
+
+---
+
+## Design Decisions
+
+Why Magic Link?
+
+- Eliminates password storage risks
+- Improves onboarding experience
+
+Why JWT?
+
+- Stateless authentication
+- Scalable and infrastructure-friendly
+
+Why Separate Service Layer?
+
+- Clean separation of concerns
+- Easier testing
+- Reusable API logic
+
+Why Manual Verification Mode?
+
+- Expo Go deep linking limitations
+- Enables local backend testing without real email provider
+
+---
+
+## Limitations
+
+- Manual token copy required during development
+- JWT stored in AsyncStorage (not encrypted)
+- No refresh token support
+- Feedback typing issue
+- No global error handling middleware yet
+
+---
+
+## Future Improvements
+
+- Secure token storage using encrypted store
+- Refresh token rotation
+- Full universal deep linking support
+- Real email provider integration
+- Global loading and error state management
+- Observability and analytics integration
+
+---
+
+## Tech Stack
+
+- React Native (Expo)
+- TypeScript
+- Expo Router
+- AsyncStorage
+- Go Backend (LinkFlow API)
+- JWT Authentication
+
+---
+
+## Author
+
+Shahadath Hossain Tamim  
+Senior Software Engineer
