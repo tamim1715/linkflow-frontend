@@ -3,6 +3,9 @@
     "name": "linkflow-frontend",
     "slug": "linkflow-frontend",
     "scheme": "linkflow",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

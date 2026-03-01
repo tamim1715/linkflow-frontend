@@ -23,10 +23,6 @@ export default function Home() {
       const yesClickedTime = await AsyncStorage.getItem("yesClickedTime");
       const reviewCompleted = await AsyncStorage.getItem("reviewCompleted");
 
-      console.log("onboardingDone:", onboardingDone);
-      console.log("yesClickedTime:", yesClickedTime);
-      console.log("reviewCompleted:", reviewCompleted);
-
       // If review already completed → never show again
       if (reviewCompleted === "true") {
         setReady(true);
@@ -44,7 +40,7 @@ export default function Home() {
           (Date.now() - new Date(yesClickedTime).getTime()) /
           (1000 * 60 * 60 * 24);
 
-        if (days >= 0) {
+        if (days >= 2) {
           setSheet("store");
         }
       }

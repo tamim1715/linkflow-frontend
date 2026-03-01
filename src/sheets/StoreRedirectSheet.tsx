@@ -1,10 +1,10 @@
 import * as Linking from "expo-linking";
 import {
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 type Props = {
@@ -19,10 +19,10 @@ export default function StoreRedirectSheet({ onLeaveReview }: Props) {
         : "https://play.google.com/store/apps/details?id=YOUR_PACKAGE";
 
     try {
-      // ✅ Mark review as completed
+      // Mark review as completed
       onLeaveReview();
 
-      // ✅ Open store
+      // Open store
       const supported = await Linking.canOpenURL(url);
 
       if (supported) {

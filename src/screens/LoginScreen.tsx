@@ -1,33 +1,28 @@
-import React, { useState } from "react";
-import { Button, StyleSheet, TextInput, View } from "react-native";
+import { useState } from "react";
+import { Button, TextInput, View } from "react-native";
+import { requestMagicLink } from "../services/authService";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
 
+  const handleLogin = async () => {
+    try {
+      await requestMagicLink(email);
+      alert("Check your email for login link");
+    } catch (error) {
+      console.log(error);
+      alert("Failed to send link");
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <View>
       <TextInput
-        placeholder="Enter your email"
+        placeholder="Enter email"
         value={email}
         onChangeText={setEmail}
-        style={styles.input}
       />
-
-      <Button title="Send Login Link" onPress={() => {}} />
+      <Button title="Send Magic Link" onPress={handleLogin} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-  },
-  input: {
-    borderWidth: 1,
-    padding: 12,
-    marginBottom: 20,
-    borderRadius: 8,
-  },
-});

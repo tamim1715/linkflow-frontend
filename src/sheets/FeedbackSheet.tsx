@@ -1,74 +1,72 @@
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { sendFeedback } from "../services/feedbackService";
 
-interface Props {
-  onSubmit: () => void;
+interface FeedbackSheetProps {
+  onSubmit?: () => void;
 }
 
-export default function FeedbackSheet({ onSubmit }: Props) {
+export default function FeedbackSheet({ onSubmit }: FeedbackSheetProps) {
   const [text, setText] = useState("");
 
+  const handleSubmit = async () => {
+    try {
+      await sendFeedback(text);
+
+      alert("Feedback sent!");
+
+      if (onSubmit) {
+        onSubmit();
+      }
+
+    } catch (error) {
+      console.log(error);
+      alert("Failed to send feedback");
+    }
+  };
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <View>
-        <Text style={styles.title}>
-          Help us improve Rizon
-        </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Help us improve Rizon</Text>
 
-        <Text style={styles.subtitle}>
-          Tell us what didn’t feel right, we read every message.
-        </Text>
+      <TextInput
+        style={styles.input}
+        multiline
+        placeholder="Type your feedback here..."
+        value={text}
+        onChangeText={setText}
+      />
 
-        <TextInput
-          style={styles.input}
-          multiline
-          placeholder="Type your feedback here..."
-          value={text}
-          onChangeText={setText}
-        />
-
-        <TouchableOpacity style={styles.button} onPress={onSubmit}>
-          <Text style={{ color: "#fff" }}>
-            Send feedback
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={{ color: "#fff" }}>Send feedback</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  title: {
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 8,
+  container: {
+    padding: 24,
   },
-  subtitle: {
-    textAlign: "center",
-    color: "#8E8E93",
-    marginBottom: 24,
+  title: {
+    fontSize: 20,
+    marginBottom: 20,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#D1D1D6",
-    borderRadius: 14,
     padding: 12,
-    height: 100,
-    marginBottom: 24,
+    borderRadius: 10,
+    marginBottom: 20,
+    minHeight: 100,
   },
   button: {
-    backgroundColor: "#000",
+    backgroundColor: "black",
     padding: 14,
     borderRadius: 20,
     alignItems: "center",
