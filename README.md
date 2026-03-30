@@ -286,4 +286,4 @@ Why Manual Verification Mode?
 ## Author
 
 Shahadath Hossain Tamim  
-Senior Software Engineer
+Software Engineer
